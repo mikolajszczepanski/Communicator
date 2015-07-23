@@ -3,4 +3,5 @@ Internet Communicator
 
 
 Todo
-[] - prosty czat
+- [x] - postawienie serwera
+- [ ] - prosty czat
