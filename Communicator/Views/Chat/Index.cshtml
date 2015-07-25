@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/_ChatLayout.cshtml";
+}
+
+<div class="row">
+    <br />
+    <br />
+    <h1>Chat</h1>
+    @Html.ActionLink("[back]", "Index", "Home")
+    <hr />
+    <div class="container">
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="displayname">Name</label>
+                <input type="text" class="form-control" id="displayname" placeholder="Your Name">
+            </div>
+            <hr />
+            <div class="container" id="discussion"></div>
+            <hr />
+            <input type="email" class="form-control" id="message" placeholder="Type here">
+            <button type="submit" class="btn btn-default" id="sendmessage">Send</button>
+        </form>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            // Declare a proxy to reference the hub.
+            var chat = $.connection.chatHub;
+            // Create a function that the hub can call to broadcast messages.
+            chat.client.broadcastMessage = function (name, message,sendedTime) {
+                // Add the message to the page.
+                $('#discussion').append('<dl><dt>' + name
+                    + '(Sended ' + sendedTime + ')</dt><dd>' + message + '</dd></dl>');
+            };
+            // Set initial focus to message input box.
+            $('#message').focus();
+            // Start the connection.
+            $.connection.hub.start().done(function () {
+                $('#sendmessage').click(function (event) {
+                    event.preventDefault();
+                    // Call the Send method on the hub.
+                    chat.server.send($('#displayname').val(), $('#message').val());
+                    // Clear text box and reset focus for next comment.
+                    $('#message').val('').focus();
+                    p
+                });
+            });
+        });
+    </script>
+</div>
