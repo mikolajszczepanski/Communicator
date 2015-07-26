@@ -3,24 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.Identity;
+using System.Web.Security;
 
 namespace Communicator.Hubs
 {
     public class ChatHub : Hub
     {
-        /*public void Hello()
+        public void Send(string message,
+                         string userIdTo,
+                         string userIdFrom,
+                         string token)
         {
-            Clients.All.hello();
-        }*/
-
-        public void Send(string name, string message)
-        {
-            
-            string dateTime = DateTime.Now.Hour.ToString().PadLeft(2,'0') + 
+            try {
+                // string name = Membership.GetUser(userIdFrom).UserName; //exception
+                string dateTime = DateTime.Now.Hour.ToString().PadLeft(2, '0') +
                         ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0');
 
-            // Call the broadcastMessage method to update clients.
-            Clients.All.broadcastMessage(name, message, dateTime);
+                Clients.All.broadcastMessage(userIdFrom, message, dateTime);
+            }
+            catch (NullReferenceException exception)
+            {
+                Clients.All.broadcastMessage("Server", 
+                                             exception.Message + " " + 
+                                             exception.StackTrace,DateTime.Now);
+            }
+            
         }
     }
 }
