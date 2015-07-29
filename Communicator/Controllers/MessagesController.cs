@@ -15,12 +15,14 @@ namespace Communicator.Controllers
         private DefaultConnection db = new DefaultConnection();
 
         // GET: Messages
+        [Authorize]
         public ActionResult Index()
         {
             return View(db.Messages.ToList());
         }
 
         // GET: Messages/Details/5
+        [Authorize]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -36,6 +38,7 @@ namespace Communicator.Controllers
         }
 
         // GET: Messages/Create
+        [Authorize]
         public ActionResult Create()
         {
             return View();
@@ -46,6 +49,7 @@ namespace Communicator.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult Create([Bind(Include = "Id,Content,UserIdTo,UserIdFrom,DateTimeSended,IpAddress,Token,Flag")] Message message)
         {
             if (ModelState.IsValid)
@@ -59,6 +63,7 @@ namespace Communicator.Controllers
         }
 
         // GET: Messages/Edit/5
+        [Authorize]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -78,6 +83,7 @@ namespace Communicator.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult Edit([Bind(Include = "Id,Content,UserIdTo,UserIdFrom,DateTimeSended,IpAddress,Token,Flag")] Message message)
         {
             if (ModelState.IsValid)
@@ -90,6 +96,7 @@ namespace Communicator.Controllers
         }
 
         // GET: Messages/Delete/5
+        [Authorize]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -107,6 +114,7 @@ namespace Communicator.Controllers
         // POST: Messages/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult DeleteConfirmed(int id)
         {
             Message message = db.Messages.Find(id);

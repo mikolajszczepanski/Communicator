@@ -44,6 +44,16 @@ namespace Communicator.Models
             Flag = _Flag;
         }
 
+        public override string ToString()
+        {
+            return ( Id + "\n" +
+                     UserIdFrom + " to " + UserIdTo + "\n" +
+                     DateTimeSended + "\n" +
+                     IpAddress + "\n" +
+                     Token + "\n" +
+                     Flag);
+        }
+
         public int Id { get; private set; }
         public string Content { get; private set; }
         public string UserIdTo { get; private set; }

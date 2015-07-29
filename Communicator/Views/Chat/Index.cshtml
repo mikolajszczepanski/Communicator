@@ -32,8 +32,8 @@
                     <!-- Miejsce na wiadomości -->
                 </div>
                 <hr />
-                <input type="email" class="form-control" id="message" placeholder="Type here">
-                <button type="submit" class="btn btn-default" id="sendmessage">Send</button>
+                <input type="text" class="form-control" id="message" placeholder="Type here" disabled="disabled">
+                <button type="submit" class="btn btn-default" id="sendmessage" disabled="disabled">Send</button>
             </form>
         </div>
         <div class="col-md-4">
@@ -49,6 +49,7 @@
         </div>
     <script type="text/javascript">
         $(function () {
+            var connected = false;
             var chat = $.connection.chatHub;
             $('#message').focus();
 
@@ -56,8 +57,17 @@
                 $('#discussion').append('<dl><dt>' + name
                     + '(Sended ' + sendedTime + ')</dt><dd>' + message + '</dd></dl>');
             };
+            chat.client.getToken = function (token) {
+                $('#token').val(token);
+            }
 
             $.connection.hub.start().done(function () {
+                connected = true;
+                $('#message').removeAttr("disabled");
+                $('#sendmessage').removeAttr("disabled");
+
+                chat.server.getToken();
+
                 $('#sendmessage').click(function (event) {
                     event.preventDefault();
 
@@ -73,6 +83,7 @@
                     $('#message').val('').focus();
                 });
             });
+
         });
     </script>
 </div>
