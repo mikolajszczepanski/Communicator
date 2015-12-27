@@ -10,7 +10,7 @@ using Communicator.Models;
 
 namespace Communicator.Controllers
 {
-    public class MessagesController : Controller
+    public class MessagesController : BaseController
     {
         private DefaultConnection db = new DefaultConnection();
 

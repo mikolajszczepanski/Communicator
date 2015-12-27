@@ -1,12 +1,8 @@
-﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
-}
-
+﻿
 /* Set padding to keep content from hitting the edges */
 .body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 /* Override the default bootstrap behavior where horizontal description lists 
@@ -21,4 +17,97 @@ input,
 select,
 textarea {
     max-width: 280px;
+}
+
+
+div#messagesTabs{
+    overflow:scroll; 
+    max-height:400px;
+    display:inline-block;
+}
+
+div#messagesTabs > ul,li,a{
+    display:inherit;
+}
+div#discussion{
+    overflow:scroll;
+    height:30em;
+    width:100%;
+    margin:0px;
+    padding:0px;
+}
+
+.my-message{
+    background-color:#286090;
+    color: #fff;
+    border: 1px solid #204d74;
+    padding: 10px;
+    float: left;
+    width:60%;
+}
+
+.message{
+    background-color:#4d1058;
+    color: #fff;
+    border: 1px solid #120138;
+    padding: 10px;
+    float: right;
+    width:60%;
+}
+
+.bad-message{
+    color: #fff;
+    background-color:#d9534f;
+    border: 1px solid #d43f3a;
+    padding: 10px;
+}
+
+.good-message{
+    color: #fff;
+    background-color:#449d44;
+    border: 1px solid #398439;
+    padding: 10px;
+}
+.warning-message{
+    color: #fff;
+    background-color:#ec971f;
+    border: 1px solid #d58512;
+    padding: 10px;
+}
+
+dt{
+   font-weight: normal;
+}
+
+
+a.active-user{
+    background-image: url('Images/status_active.png') ;
+    background-repeat: no-repeat;
+    background-position: left center;
+    color:#449d44;
+}
+
+.app-title{
+    margin:0px;
+    padding:5px;
+    background-color: #202020;
+    color:#fff;
+    top: 0px;
+    left: 0px;
+    height: 45px;
+}
+.app-title h1,h2,h3,h4,h5{
+    margin:5px;
+}
+.app-body{
+    margin-top:30px;
+}
+.connection-status-ok{
+    color:green;
+}
+.connection-status-bad{
+    color:red;
+}
+.connection-status-doing{
+    color:orangered;
 }

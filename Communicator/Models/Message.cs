@@ -8,8 +8,8 @@ namespace Communicator.Models
 {
     public enum MessageFlagType
     {
-        MESSAGE_NULL,
         MESSAGE_WAITING_FOR_DELIVER,
+        MESSAGE_SENDED,
         MESSAGE_DELIVERED
     }
 
@@ -24,7 +24,7 @@ namespace Communicator.Models
             DateTimeSended = DateTime.Now;
             IpAddress = null;
             Token = null;
-            Flag = MessageFlagType.MESSAGE_NULL;
+            Flag = MessageFlagType.MESSAGE_WAITING_FOR_DELIVER;
 
         }
         public Message(string _Content,
@@ -46,12 +46,13 @@ namespace Communicator.Models
 
         public override string ToString()
         {
-            return ( Id + "\n" +
-                     UserIdFrom + " to " + UserIdTo + "\n" +
-                     DateTimeSended + "\n" +
-                     IpAddress + "\n" +
-                     Token + "\n" +
-                     Flag);
+            return ( "{Id = " + Id + "\n" +
+                     " UserIdFrom = " + UserIdFrom + "\n" +
+                     " UserIdTo = " + UserIdTo + "\n" +
+                     " DateTimeSended = " + DateTimeSended + "\n" +
+                     " IpAddress = " + IpAddress + "\n" +
+                     " Token = " + Token + "\n" +
+                     " Flag = " + Flag + " }");
         }
 
         public int Id { get; private set; }

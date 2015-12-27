@@ -59,9 +59,17 @@
             @Html.DisplayFor(modelItem => item.Flag)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Options <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>@Html.ActionLink("Edit", "Edit", new { id = item.Id })</li>
+                    <li>@Html.ActionLink("Details", "Details", new { id = item.Id })</li>
+                    <li>@Html.ActionLink("Delete", "Delete", new { id = item.Id })</li>
+                </ul>
+            </div>
+            
         </td>
     </tr>
 }

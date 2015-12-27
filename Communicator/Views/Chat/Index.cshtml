@@ -1,89 +1,65 @@
 ﻿@using Microsoft.AspNet.Identity
 @{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Chat";
     Layout = "~/Views/Shared/_ChatLayout.cshtml";
 }
-
-<div class="row">
-    <h1>Chat</h1>
-    @Html.ActionLink("[back]", "Index", "Home")
-    <hr />
-    <div class="container">
-        <div class="col-md-8">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="displayname">Name</label>
-                    <input type="text" class="form-control" id="displayname" value="@User.Identity.GetUserName()">
-                </div>
-                <div class="form-group">
-                    <label for="displayname">User ID From</label>
-                    <input type="text" class="form-control" id="useridfrom" value="@User.Identity.GetUserId()">
-                </div>
-                <div class="form-group">
-                    <label for="displayname">User ID To</label>
-                    <input type="text" class="form-control" id="useridto" value="">
-                </div>
-                <div class="form-group">
-                    <label for="displayname">Token</label>
-                    <input type="text" class="form-control" id="token" value="">
-                </div>
-                <hr />
-                <div class="container" id="discussion" style="overflow:auto; max-height:400px;">
-                    <!-- Miejsce na wiadomości -->
-                </div>
-                <hr />
-                <input type="text" class="form-control" id="message" placeholder="Type here" disabled="disabled">
-                <button type="submit" class="btn btn-default" id="sendmessage" disabled="disabled">Send</button>
-            </form>
+<div class="col-md-12 app-title">
+    <div class="col-md-6">
+        <h3 class="">Internet chat application<small id="connection-status"></small></h3>
+    </div>
+    <div class="pull-right">
+        <h3>@ViewData["FirstName"] @ViewData["LastName"]</h3>
+    </div>
+</div>
+<div class="col-md-12 app-body">
+    <div class="col-md-8">
+    <form class="form-inline">
+        <div class="hidden">
+            <div class="form-group">
+                <label for="displayname">Name</label>
+                <input type="text" class="form-control" id="displayname" value="@User.Identity.GetUserName()">
+            </div>
+            <div class="form-group">
+                <label for="displayname">User ID From</label>
+                <input type="text" class="form-control" id="useridfrom" value="@User.Identity.GetUserId()">
+            </div>
+            <div class="form-group">
+                <label for="displayname">User ID To</label>
+                <input type="text" class="form-control" id="useridto" value="">
+            </div>
+            <div class="form-group">
+                <label for="displayname">Token</label>
+                <input type="text" class="form-control" id="token" value="">
+            </div>
         </div>
-        <div class="col-md-4">
-            <h1>Kontakty</h1>
-            <ul class="nav" style="overflow:auto; max-height:400px;">
-                <li role="presentation">
-                    <a href="#">Kontakt 1</a>
-                </li>
-                <li role="presentation">
-                    <a href="#">Kontakt 2</a>
+        <hr />
+        <!--<<ul class="nav nav-tabs list-inline" id="conversationsTabs">
+            <li role="presentation" class="active"><a href="#">user name</a></li>
+        </ul>-->
+        <div class="container" id="tabs">
+        </div>
+        <div class="container" id="discussion">
+            <!-- Miejsce na wiadomości -->
+        </div>
+        <hr />
+        <input type="text" class="form-control" id="message" placeholder="Type here" disabled="disabled">
+        <button type="submit" class="btn btn-default" id="sendmessage" disabled="disabled">Send</button>
+    </form>
+</div>
+    <div class="col-md-4">
+        <h1>Contacts</h1>
+        <ul class="nav" id="messagesTabs">
+            <li role="presentation">
+                @{
+                    foreach (var item in ViewBag.UsersList)
+                    {
+                    <li role="presentation">
+                        <a class="contact" href="#" userId="@item.Id" userName="@item.UserName">@item.UserName</a>
+                    </li>
+                    }
+
+                }
                 </li>
             </ul>
         </div>
-    <script type="text/javascript">
-        $(function () {
-            var connected = false;
-            var chat = $.connection.chatHub;
-            $('#message').focus();
-
-            chat.client.broadcastMessage = function (name, message,sendedTime) {
-                $('#discussion').append('<dl><dt>' + name
-                    + '(Sended ' + sendedTime + ')</dt><dd>' + message + '</dd></dl>');
-            };
-            chat.client.getToken = function (token) {
-                $('#token').val(token);
-            }
-
-            $.connection.hub.start().done(function () {
-                connected = true;
-                $('#message').removeAttr("disabled");
-                $('#sendmessage').removeAttr("disabled");
-
-                chat.server.getToken();
-
-                $('#sendmessage').click(function (event) {
-                    event.preventDefault();
-
-                    var message = $('#message').val();
-                    var userIdTo = $('#useridto').val();
-                    var userIdFrom = $('#useridfrom').val();
-                    var token = $('#token').val()
-
-                    chat.server.send(message,
-                                     userIdTo,
-                                     userIdFrom,
-                                     token);
-                    $('#message').val('').focus();
-                });
-            });
-
-        });
-    </script>
 </div>

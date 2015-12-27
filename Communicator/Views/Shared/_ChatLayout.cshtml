@@ -5,9 +5,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <title>@ViewBag.Title</title>
 
-    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/chat_css")
 
     <!--Script references. -->
     <!--Reference the jQuery library. -->
@@ -19,13 +19,9 @@
     <!--Add script to update the page and send messages.-->
 </head>
 <body>
-    <div class="container body-content">
+    <div class="body-content">
         @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
-        </footer>
     </div>
-
+    @Scripts.Render("~/Scripts/Chat.js")
 </body>
 </html>

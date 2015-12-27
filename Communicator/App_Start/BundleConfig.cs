@@ -25,7 +25,20 @@ namespace Communicator
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
-                      "~/Content/site.css"));
+                      "~/Content/site.css"
+
+                      ));
+            bundles.Add(new StyleBundle("~/Content/no-script-template").Include(
+                     "~/Content/css/skel.css",
+                     "~/Content/css/style.css",
+                     "~/Content/css/style-xlarge.css"
+                     ));
+            bundles.Add(new StyleBundle("~/Content/chat_css").Include(
+                      "~/Content/bootstrap.css",
+                      "~/Content/site.css"
+                      ));
+
+
         }
     }
 }

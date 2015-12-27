@@ -9,22 +9,60 @@ using Communicator.Models;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Web.Script.Serialization;
 
 namespace Communicator.Hubs
 {
+    public class GroupManager
+    {
+        private List<string> ActiveGroups = new List<string>();
+
+        public void Add(string GroupName)
+        {
+            if (!CheckIfGroupIsActive(GroupName))
+            {
+                ActiveGroups.Add(GroupName);
+            }
+        }
+
+        public void Remove(string GroupName)
+        {
+            ActiveGroups.Remove(GroupName);
+        }
+
+        public bool CheckIfGroupIsActive(string GroupName)
+        {
+            string FoundGroup = ActiveGroups.Find(x => x == GroupName);
+            return FoundGroup != null ? true : false;
+        }
+
+        public List<string> GetList()
+        {
+            return ActiveGroups;
+        }
+    }
+
     public class ChatHub : Hub
     {
-        private DefaultConnection db = new DefaultConnection();
+        private DefaultConnection Datebase = new DefaultConnection();
+        static private GroupManager GroupManagerObject = new GroupManager();
+
+        private string GetCallerGroupName()
+        {
+            return Context.User.Identity.GetUserId<string>();
+        }
 
 
         public override async Task OnConnected()
         {
-            //uwierzytelnienie
+#if DEBUG
+            var id = Context.ConnectionId;
+            Debug.WriteLine("OnConnected: " + id.ToString());
+#endif
 
-            #if DEBUG
-                var id = Context.ConnectionId;
-                Debug.WriteLine("OnConnected: " + id.ToString());
-            #endif
+            await Groups.Add(Context.ConnectionId, GetCallerGroupName());
+            GroupManagerObject.Add(GetCallerGroupName());
+            AddUserActive(GetCallerGroupName());
 
             await base.OnConnected();
         }
@@ -32,13 +70,26 @@ namespace Communicator.Hubs
 
         public override async Task OnDisconnected(bool StopCalled)
         {
-            //usuwa z kolekcji polaczenie
+#if DEBUG
+            var id = Context.ConnectionId;
+            Debug.WriteLine("OnDisconnected: " + id.ToString());
+#endif
+            GroupManagerObject.Remove(GetCallerGroupName());
+            RemoveUserActive(GetCallerGroupName());
+            await Groups.Remove(Context.ConnectionId, GetCallerGroupName());
+            
 
-            #if DEBUG
-                var id = Context.ConnectionId;
-                Debug.WriteLine("OnConnected: " + id.ToString());
-            #endif
             await base.OnDisconnected(StopCalled);
+        }
+
+        public override Task OnReconnected()
+        {
+#if DEBUG
+            var id = Context.ConnectionId;
+            Debug.WriteLine("OnReconnected: " + id.ToString());
+#endif
+
+            return base.OnReconnected();
         }
 
         public void GetToken()
@@ -46,45 +97,114 @@ namespace Communicator.Hubs
             byte[] Time = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
             byte[] Key = Guid.NewGuid().ToByteArray();
             string Token = Convert.ToBase64String(Time.Concat(Key).ToArray());
-            Clients.Caller.broadcastMessage("Server", "Your token: " + Token, DateTime.Now);
+            Clients.Caller.ServerMessage("Your token: " + Token, DateTime.Now);
             Clients.Caller.GetToken(Token);
+        }
+
+        public void GetHistory()
+        {
+            string UserIdFrom = Context.User.Identity.GetUserId<string>();
+
+            var messages = from m 
+                           in Datebase.Messages
+                           where m.UserIdTo == UserIdFrom && m.Flag == MessageFlagType.MESSAGE_WAITING_FOR_DELIVER
+                           select m;
+
+            foreach (var item in messages)
+            {
+                Clients.Group(item.UserIdTo).message(item.UserIdTo,item.UserIdFrom, item.Content, item.DateTimeSended);
+                item.Flag = MessageFlagType.MESSAGE_SENDED;
+            }
+
+            Datebase.SaveChangesAsync();
+
+        }
+
+        public void GetActiveUsers()
+        {
+            var jsonSerialiser = new JavaScriptSerializer();
+            var jsonList = jsonSerialiser.Serialize(GroupManagerObject.GetList());
+            Clients.Caller.setActiveUsers(jsonList);
+        }
+
+        public void RemoveUserActive(string InactiveUser)
+        {
+            foreach (var item in GroupManagerObject.GetList())
+            {
+                Clients.Group(item).disableActiveUser(InactiveUser);
+            }
+
+        }
+
+        public void AddUserActive(string ActiveUser)
+        {
+            foreach (var item in GroupManagerObject.GetList())
+            {
+                Clients.Group(item).enableActiveUser(ActiveUser);
+            }
+        }
+
+        public void GetContacts()
+        {
+            var context = new ApplicationDbContext();
+            var users = from u
+                        in context.Users
+                        select u;
+
+            foreach (var user in users)
+            {
+                Clients.Caller.setContact(user.Id,user.UserName);
+            }
         }
 
 
         public void Send(string Message,
                          string UserIdTo,
-                         string UserIdFrom,
                          string Token)
         {
-         
-            try {
-                // string name = Membership.GetUser(userIdFrom).UserName; //exception
-                string dateTime = DateTime.Now.Hour.ToString().PadLeft(2, '0') +
-                        ":" + DateTime.Now.Minute.ToString().PadLeft(2, '0');
+            var UserIdFrom = Context.User.Identity.GetUserId<string>();
+            bool IsUserToActive = GroupManagerObject.CheckIfGroupIsActive(UserIdTo);
+            MessageFlagType Flag = MessageFlagType.MESSAGE_WAITING_FOR_DELIVER;
+
+            if (IsUserToActive)
+            {
+                Flag = MessageFlagType.MESSAGE_SENDED;
+            }
+
+            try
+            {
 
                 Message SendedMessage = new Message(Message,
                                                     UserIdTo,
                                                     UserIdFrom,
                                                     DateTime.Now,
-                                                    null,
-                                                    null,
-                                                    MessageFlagType.MESSAGE_WAITING_FOR_DELIVER);
-                #if DEBUG
-                    Debug.WriteLine(SendedMessage.ToString());
-                #endif
+                                                    Context.Request.Environment["server.RemoteIpAddress"].ToString(),
+                                                    Token,
+                                                    Flag);
+#if DEBUG
+                Debug.WriteLine(SendedMessage.ToString());
+#endif
 
-                db.Messages.Add(SendedMessage);
-                db.SaveChangesAsync();
+                Datebase.Messages.Add(SendedMessage);
+                Datebase.SaveChangesAsync();
 
-                Clients.All.broadcastMessage(UserIdFrom, Message, dateTime);
+
+                Clients.Caller.message(UserIdTo,UserIdFrom, Message, DateTime.Now);
+
+                if (IsUserToActive)
+                {
+                    Clients.Group(UserIdTo).message(UserIdTo,UserIdFrom, Message, DateTime.Now);
+                }
+
             }
-            catch (NullReferenceException exception)
+            catch (Exception exception)
             {
-                Clients.All.broadcastMessage("Server", 
-                                             exception.Message + " " + 
-                                             exception.StackTrace,DateTime.Now);
+                Clients.Group(GetCallerGroupName()).ServerMessage(exception.Message,
+                                                                  DateTime.Now);
             }
             
         }
+
+
     }
 }
