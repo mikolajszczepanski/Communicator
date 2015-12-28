@@ -13,6 +13,19 @@ using System.Web.Script.Serialization;
 
 namespace Communicator.Hubs
 {
+    public class UserGroup
+    {
+        public UserGroup(string _name)
+        {
+            name = _name;
+            counter = 1;
+        }
+
+        public string name { get; set; }
+        public uint counter { get; set; }
+    }
+
+
     public class GroupManager
     {
         private List<string> ActiveGroups = new List<string>();
