@@ -28,30 +28,53 @@ namespace Communicator.Hubs
 
     public class GroupManager
     {
-        private List<string> ActiveGroups = new List<string>();
+        private List<UserGroup> ActiveGroups = new List<UserGroup>();
 
         public void Add(string GroupName)
         {
             if (!CheckIfGroupIsActive(GroupName))
             {
-                ActiveGroups.Add(GroupName);
+                ActiveGroups.Add(new UserGroup(GroupName));
+            }
+            else
+            {
+                UserGroup FoundGroup = Find(GroupName);
+                FoundGroup.counter++;
             }
         }
 
         public void Remove(string GroupName)
         {
-            ActiveGroups.Remove(GroupName);
+            UserGroup FoundGroup = Find(GroupName);
+            FoundGroup.counter--;
+            if (FoundGroup.counter <= 0)
+            {
+                ActiveGroups.Remove(FoundGroup);
+            }
         }
 
         public bool CheckIfGroupIsActive(string GroupName)
         {
-            string FoundGroup = ActiveGroups.Find(x => x == GroupName);
+            UserGroup FoundGroup = Find(GroupName);
             return FoundGroup != null ? true : false;
+        }
+
+        public UserGroup Find(string GroupName)
+        {
+            return ActiveGroups.Find(x => x.name == GroupName);
         }
 
         public List<string> GetList()
         {
-            return ActiveGroups;
+
+            List<string> temp = new List<string>();
+
+            foreach (var item in ActiveGroups)
+            {
+                temp.Add(item.name);
+            }
+
+            return temp;
         }
     }
 
@@ -142,6 +165,11 @@ namespace Communicator.Hubs
 
         public void RemoveUserActive(string InactiveUser)
         {
+            if(GroupManagerObject.Find(InactiveUser) != null)
+            {
+                return;
+            }
+
             foreach (var item in GroupManagerObject.GetList())
             {
                 Clients.Group(item).disableActiveUser(InactiveUser);
